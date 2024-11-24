@@ -1,0 +1,6 @@
+/target
+/debug
+**/*.rs.bk
+*.pdb
+.DS_Store
+.idea
