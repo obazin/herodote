@@ -39,3 +39,69 @@ where
         }
     });
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::{Conversation, ConversationItem};
+    use std::fs;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_conversation_to_md() {
+        let conversation = Conversation {
+            title: "Test Conversation".to_string(),
+            date: "2023-01-01".to_string(),
+            items: vec![
+                ConversationItem {
+                    text: "Hello!".to_string(),
+                    author: "user".to_string(),
+                    time: 1672531200.0,
+                },
+                ConversationItem {
+                    text: "Hi!".to_string(),
+                    author: "assistant".to_string(),
+                    time: 1672531210.0,
+                },
+            ],
+        };
+
+        let markdown = conversation_to_md(conversation);
+        let expected = r#"# Test Conversation
+
+## Question
+Hello!
+
+## Answer
+Hi!
+
+"#;
+        assert_eq!(markdown, expected);
+    }
+
+    #[test]
+    fn test_write() {
+        let conversations = vec![Conversation {
+            title: "Test Conversation".to_string(),
+            date: "2023-01-01".to_string(),
+            items: vec![ConversationItem {
+                text: "Hello!".to_string(),
+                author: "user".to_string(),
+                time: 1672531200.0,
+            }],
+        }];
+
+        let output_folder = PathBuf::from("./test_output");
+        write(conversations, &output_folder);
+
+        let output_path = output_folder.join("2023-01-01-Test_Conversation.md");
+        assert!(output_path.exists());
+
+        let content = fs::read_to_string(output_path.clone()).unwrap();
+        assert!(content.contains("# Test Conversation"));
+
+        // Clean up
+        fs::remove_file(output_path).unwrap();
+        fs::remove_dir(output_folder).unwrap();
+    }
+}
