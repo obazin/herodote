@@ -48,3 +48,41 @@ pub fn date_from_epoch_time(epoch_time: f64) -> String {
     };
     datetime.format("%Y-%m-%d").to_string()
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::utils::{date_from_epoch_time, normalized_filename_string};
+
+    #[test]
+    fn test_normalized_filename_string() {
+        assert_eq!(
+            normalized_filename_string("This is a Test!", 20),
+            "This_is_a_Test"
+        );
+        assert_eq!(
+            normalized_filename_string("Special @#$%^&*() Characters", 25),
+            "Special__Characters"
+        );
+        assert_eq!(
+            normalized_filename_string("Word Boundaries Work Well", 10),
+            "Word"
+        );
+        assert_eq!(normalized_filename_string("SingleWord", 50), "SingleWord");
+    }
+
+    #[test]
+    fn test_date_from_epoch_time() {
+        assert_eq!(
+            date_from_epoch_time(1672531200.0), // Jan 1, 2023, UTC
+            "2023-01-01"
+        );
+        assert_eq!(
+            date_from_epoch_time(0.0), // Unix epoch start
+            "1970-01-01"
+        );
+        assert_eq!(
+            date_from_epoch_time(-1.0), // Negative time (pre-epoch)
+            "1969-12-31"
+        );
+    }
+}
