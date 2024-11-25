@@ -43,3 +43,93 @@ fn process_interaction_node(node: Node) -> Option<ConversationItem> {
         message.create_time.unwrap_or(0.0),
     ))
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        converter::create_conversation_from,
+        model::{Author, Content, GPTInteraction, Message, MessageMetadata, Node, Part},
+    };
+    use std::collections::HashMap;
+
+    #[test]
+    fn test_create_conversation_from() {
+        let interaction = GPTInteraction {
+            title: "Test Conversation".to_string(),
+            create_time: 0.0,
+            update_time: 1672531200.0,
+            mapping: HashMap::from([
+                (
+                    "1".to_string(),
+                    Node {
+                        id: "1".to_string(),
+                        message: Some(Message {
+                            id: "1".to_string(),
+                            author: Author {
+                                role: "user".to_string(),
+                                name: None,
+                                metadata: HashMap::new(),
+                            },
+                            create_time: Some(1672531200.0),
+                            update_time: None,
+                            content: Content {
+                                content_type: "text".to_string(),
+                                parts: Some(vec![Part::String("Hello!".to_string())]),
+                            },
+                            status: "complete".to_string(),
+                            end_turn: None,
+                            weight: 1.0,
+                            metadata: MessageMetadata {
+                                additional_metadata: HashMap::new(),
+                            },
+                            recipient: "assistant".to_string(),
+                            channel: None,
+                        }),
+                        parent: None,
+                        children: vec![],
+                    },
+                ),
+                (
+                    "2".to_string(),
+                    Node {
+                        id: "2".to_string(),
+                        message: Some(Message {
+                            id: "2".to_string(),
+                            author: Author {
+                                role: "assistant".to_string(),
+                                name: None,
+                                metadata: HashMap::new(),
+                            },
+                            create_time: Some(1672531210.0),
+                            update_time: None,
+                            content: Content {
+                                content_type: "text".to_string(),
+                                parts: Some(vec![Part::String("Hi!".to_string())]),
+                            },
+                            status: "complete".to_string(),
+                            end_turn: None,
+                            weight: 1.0,
+                            metadata: MessageMetadata {
+                                additional_metadata: HashMap::new(),
+                            },
+                            recipient: "user".to_string(),
+                            channel: None,
+                        }),
+                        parent: Some("1".to_string()),
+                        children: vec![],
+                    },
+                ),
+            ]),
+        };
+
+        let conversation = create_conversation_from(interaction);
+
+        assert_eq!(conversation.title, "Test Conversation");
+        assert_eq!(conversation.date, "2023-01-01");
+        assert_eq!(conversation.items.len(), 2);
+        assert_eq!(conversation.items[0].text, "Hello!");
+        assert_eq!(conversation.items[0].author, "user");
+        assert_eq!(conversation.items[1].text, "Hi!");
+        assert_eq!(conversation.items[1].author, "assistant");
+    }
+}
