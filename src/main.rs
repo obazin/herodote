@@ -1,8 +1,9 @@
 use clap::Parser;
-use model::{Conversation, GPTInteraction};
+use model::GPTInteraction;
 use std::path::PathBuf;
 use std::{fs, process};
 mod conversation_writer;
+mod converter;
 mod model;
 mod utils;
 
@@ -29,7 +30,10 @@ fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     })?;
 
     conversation_writer::write(
-        interactions.into_iter().map(Conversation::from).collect(),
+        interactions
+            .into_iter()
+            .map(converter::create_conversation_from)
+            .collect(),
         cli.output_folder,
     );
     Ok(())
