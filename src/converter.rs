@@ -3,6 +3,20 @@ use crate::{
     utils::date_from_epoch_time,
 };
 
+/// Creates a `Conversation` object from a given `GPTInteraction` by processing its mapping of conversation nodes.
+///
+/// # Arguments
+///
+/// * `gpt_interaction` - A `GPTInteraction` object containing a mapping of nodes, each representing
+///   parts of the conversation hierarchy. The interaction includes a title and timestamps associated
+///   with its creation and update events.
+///
+/// # Returns
+///
+/// A `Conversation` object that includes:
+/// - A sorted list of `ConversationItem` objects, each derived from the nodes in the `GPTInteraction`.
+/// - The title of the conversation, which is extracted directly from the `GPTInteraction`.
+/// - The most recent update date, derived from the `update_time` field of the `GPTInteraction`.
 pub fn create_conversation_from(gpt_interaction: GPTInteraction) -> Conversation {
     let mut conversation_items: Vec<ConversationItem> = Vec::new();
 
@@ -19,6 +33,31 @@ pub fn create_conversation_from(gpt_interaction: GPTInteraction) -> Conversation
     )
 }
 
+/// Processes a `Node` object and extracts a `ConversationItem` if applicable.
+///
+/// This function attempts to transform a `Node` into a `ConversationItem` by inspecting the
+/// associated `Message`. It checks whether the message's author is either an "assistant" or
+/// "user" and ensures the message contains text content. If these conditions are met, it
+/// constructs a `ConversationItem` with the collected text, author's role, and creation time.
+///
+/// # Arguments
+///
+/// * `node` - A `Node` object that potentially contains a `Message`. The function examines this
+///   `Node` to determine if it can produce a valid `ConversationItem`.
+///
+/// # Returns
+///
+/// An `Option<ConversationItem>`. The function returns `Some(ConversationItem)` if the node contains
+/// a valid message authored by an "assistant" or "user" with non-empty text content. Otherwise, it
+/// returns `None`.
+///
+/// # Details
+///
+/// - The `message` field of the node is required to be present; if absent, the function returns `None`.
+/// - The role of the message author must be either "assistant" or "user" for the message to be processed.
+/// - The content of the message must contain text parts. These are filtered to include only string parts,
+///   ignoring any non-string parts. The resulting strings are concatenated, and if the resulting text is
+///   empty or only whitespace, the function returns `None`.
 fn process_interaction_node(node: Node) -> Option<ConversationItem> {
     let message = node.message?;
     let role = message.author.role;

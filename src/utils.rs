@@ -1,6 +1,22 @@
 use chrono::DateTime;
 use std::cmp;
 
+/// Transforms and truncates a given input string to create a valid filename.
+///
+/// The `normalized_filename_string` function processes an input string to:
+/// - Filter out non-alphanumeric and non-whitespace characters.
+/// - Convert whitespace to underscores.
+/// - Truncate the string to a specified maximum length, prioritizing complete words where possible.
+///
+/// # Parameters
+/// - `input: &str`: The input string to normalize and truncate. This can include mixed characters, with the expectation
+///   that non-alphanumeric and non-whitespace characters will be removed.
+/// - `max_length: usize`: The maximum permissible length for the output string. The function ensures that the returned
+///   filename string does not exceed this length.
+///
+/// # Returns
+/// - `String`: A string containing only alphanumeric characters and underscores, truncated as necessary to comply
+///   with the `max_length` constraint.
 pub fn normalized_filename_string(input: &str, max_length: usize) -> String {
     // Remove invalid characters and normalize to ASCII
     let normalized: String = input
@@ -38,6 +54,28 @@ pub fn normalized_filename_string(input: &str, max_length: usize) -> String {
     result
 }
 
+/// Converts a given epoch time (in seconds as a floating-point number) to a formatted date string
+///
+/// # Arguments
+///
+/// * `epoch_time` - A `f64` representing the epoch time. This value includes both whole seconds
+///   and fractional seconds, where the fractional part represents nanoseconds.
+///
+/// # Returns
+///
+/// * A `String` representing the date in the format `YYYY-MM-DD`. If the conversion from the
+///   timestamp fails, an empty string is returned.
+///
+/// # Example
+///
+/// ```rust
+/// use crate::utils::date_from_epoch_time;
+///
+/// let epoch_time = 1638316800.0; // This represents December 1, 2021
+/// let date = date_from_epoch_time(epoch_time);
+/// assert_eq!(date, "2021-12-01");
+/// ```
+///
 pub fn date_from_epoch_time(epoch_time: f64) -> String {
     // Separate into seconds and nanoseconds
     let seconds = epoch_time as i64;
